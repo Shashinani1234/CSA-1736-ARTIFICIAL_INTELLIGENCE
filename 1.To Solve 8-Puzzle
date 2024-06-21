@@ -1,0 +1,88 @@
+import heapq
+
+class Puzzle:
+    def __init__(self, board, goal):
+        self.board = board
+        self.goal = goal
+        self.size = len(board)
+        self.goal_map = {val: (i, j) for i, row in enumerate(goal) for j, val in enumerate(row)}
+
+    def manhattan_distance(self, board):
+        dist = 0
+        for i in range(self.size):
+            for j in range(self.size):
+                if board[i][j] != 0:
+                    goal_i, goal_j = self.goal_map[board[i][j]]
+                    dist += abs(i - goal_i) + abs(j - goal_j)
+        return dist
+
+    def get_neighbors(self, board):
+        neighbors = []
+        empty = [(i, j) for i in range(self.size) for j in range(self.size) if board[i][j] == 0][0]
+        directions = [(-1, 0), (1, 0), (0, -1), (0, 1)]
+
+        for d in directions:
+            new_i, new_j = empty[0] + d[0], empty[1] + d[1]
+            if 0 <= new_i < self.size and 0 <= new_j < self.size:
+                new_board = [row[:] for row in board]
+                new_board[empty[0]][empty[1]], new_board[new_i][new_j] = new_board[new_i][new_j], new_board[empty[0]][empty[1]]
+                neighbors.append(new_board)
+        return neighbors
+
+    def is_solved(self, board):
+        return board == self.goal
+
+    def solve(self):
+        start = tuple(tuple(row) for row in self.board)
+        goal = tuple(tuple(row) for row in self.goal)
+        frontier = [(self.manhattan_distance(self.board), start)]
+        came_from = {start: None}
+        cost_so_far = {start: 0}
+        heapq.heapify(frontier)
+
+        while frontier:
+            _, current = heapq.heappop(frontier)
+
+            if current == goal:
+                return self.reconstruct_path(came_from, current)
+
+            for neighbor in self.get_neighbors([list(row) for row in current]):
+                neighbor = tuple(tuple(row) for row in neighbor)
+                new_cost = cost_so_far[current] + 1
+
+                if neighbor not in cost_so_far or new_cost < cost_so_far[neighbor]:
+                    cost_so_far[neighbor] = new_cost
+                    priority = new_cost + self.manhattan_distance([list(row) for row in neighbor])
+                    heapq.heappush(frontier, (priority, neighbor))
+                    came_from[neighbor] = current
+
+        return None
+
+    def reconstruct_path(self, came_from, current):
+        path = []
+        while current is not None:
+            path.append([list(row) for row in current])
+            current = came_from[current]
+        path.reverse()
+        return path
+
+# Example usage:
+start = [
+    [1, 2, 3],
+    [4, 0, 5],
+    [7, 8, 6]
+]
+
+goal = [
+    [1, 2, 3],
+    [4, 5, 6],
+    [7, 8, 0]
+]
+
+puzzle = Puzzle(start, goal)
+solution = puzzle.solve()
+
+for step in solution:
+    for row in step:
+        print(row)
+    print()
