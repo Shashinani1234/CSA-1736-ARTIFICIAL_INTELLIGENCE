@@ -1,0 +1,61 @@
+import heapq
+class Graph:
+    def __init__(self):
+        self.edges = {}
+        self.huristics = {}
+
+    def neighbors(self, node):
+        return self.edges[node]
+
+    def cost(self, from_node, to_node):
+        return self.edges[from_node][to_node]
+
+def a_star_search(graph, start, goal):
+    open_set = []
+    heapq.heappush(open_set, (0, start))
+    
+    came_from = {}
+    g_score = {start: 0}
+    f_score = {start: graph.huristics[start]}
+    
+    while open_set:
+        current = heapq.heappop(open_set)[1]
+        
+        if current == goal:
+            path = []
+            while current in came_from:
+                path.append(current)
+                current = came_from[current]
+            path.append(start)
+            path.reverse()
+            return path
+        
+        for neighbor in graph.neighbors(current):
+            tentative_g_score = g_score[current] + graph.cost(current, neighbor)
+            
+            if neighbor not in g_score or tentative_g_score < g_score[neighbor]:
+                came_from[neighbor] = current
+                g_score[neighbor] = tentative_g_score
+                f_score[neighbor] = tentative_g_score + graph.huristics[neighbor]
+                heapq.heappush(open_set, (f_score[neighbor], neighbor))
+                
+    return None
+
+# Example usage
+graph = Graph()
+graph.edges = {
+    'A': {'B': 1, 'C': 4},
+    'B': {'A': 1, 'C': 2, 'D': 5},
+    'C': {'A': 4, 'B': 2, 'D': 1},
+    'D': {'B': 5, 'C': 1}
+}
+graph.huristics = {
+    'A': 7,
+    'B': 6,
+    'C': 2,
+    'D': 1
+}
+
+start, goal = 'A', 'D'
+path = a_star_search(graph, start, goal)
+print(f"Path found: {path}")
