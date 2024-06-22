@@ -1,0 +1,42 @@
+class VacuumCleanerAgent:
+    def __init__(self, environment):
+        self.environment = environment
+        self.position = (0, 0)  
+    def sense(self):
+        return self.environment[self.position[0]][self.position[1]]
+
+    def act(self, status):
+        if status == 'dirty':
+            self.environment[self.position[0]][self.position[1]] = 'clean'
+            print(f"Cleaned cell {self.position}")
+        else:
+            
+            if self.position == (0, 0):
+                self.position = (0, 1)
+            elif self.position == (0, 1):
+                self.position = (1, 1)
+            elif self.position == (1, 1):
+                self.position = (1, 0)
+            elif self.position == (1, 0):
+                self.position = (0, 0)
+            print(f"Moved to cell {self.position}")
+
+    def run(self):
+        steps = 0
+        while steps < 10:  
+            status = self.sense()
+            self.act(status)
+            steps += 1
+            if all(cell == 'clean' for row in self.environment for cell in row):
+                print("All cells are clean.")
+                break
+
+
+environment = [
+    ['dirty', 'dirty'],
+    ['dirty', 'dirty']
+]
+
+
+agent = VacuumCleanerAgent(environment)
+agent.run()
