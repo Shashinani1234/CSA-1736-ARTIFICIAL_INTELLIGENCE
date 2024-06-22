@@ -1,0 +1,53 @@
+from collections import deque
+
+def is_valid_state(state, jug1_capacity, jug2_capacity):
+    x, y = state
+    return 0 <= x <= jug1_capacity and 0 <= y <= jug2_capacity
+
+def get_neighbors(state, jug1_capacity, jug2_capacity):
+    x, y = state
+    neighbors = [
+        (jug1_capacity, y), 
+        (x, jug2_capacity), 
+        (0, y), 
+        (x, 0), 
+        (min(x + y, jug1_capacity), x + y - min(x + y, jug1_capacity)), 
+        (x + y - min(x + y, jug2_capacity), min(x + y, jug2_capacity))  
+    ]
+    return [neighbor for neighbor in neighbors if is_valid_state(neighbor, jug1_capacity, jug2_capacity)]
+
+def bfs(jug1_capacity, jug2_capacity, target):
+    start = (0, 0)
+    queue = deque([(start, [])])
+    visited = set()
+
+    while queue:
+        (current_state, path) = queue.popleft()
+        if current_state in visited:
+            continue
+        visited.add(current_state)
+
+        x, y = current_state
+        new_path = path + [current_state]
+
+        if x == target or y == target:
+            return new_path
+
+        for neighbor in get_neighbors(current_state, jug1_capacity, jug2_capacity):
+            if neighbor not in visited:
+                queue.append((neighbor, new_path))
+
+    return None
+
+
+jug1_capacity = 4
+jug2_capacity = 3
+target = 2
+
+solution = bfs(jug1_capacity, jug2_capacity, target)
+
+if solution:
+    for step in solution:
+        print(step)
+else:
+    print("No solution found.")
