@@ -1,0 +1,28 @@
+import itertools
+
+def calculate_distance(graph, path):
+    return sum(graph[path[i]][path[i + 1]] for i in range(len(path) - 1)) + graph[path[-1]][path[0]]
+
+def travelling_salesman_problem(graph):
+    nodes = list(graph.keys())
+    min_path = []
+    min_distance = float('inf')
+    
+    for perm in itertools.permutations(nodes):
+        current_distance = calculate_distance(graph, perm)
+        if current_distance < min_distance:
+            min_distance = current_distance
+            min_path = perm
+    
+    return min_path, min_distance
+
+
+graph = {
+    'A': {'A': 0, 'B': 1, 'C': 4, 'D': 6},
+    'B': {'A': 1, 'B': 0, 'C': 2, 'D': 5},
+    'C': {'A': 4, 'B': 2, 'C': 0, 'D': 1},
+    'D': {'A': 6, 'B': 5, 'C': 1, 'D': 0}
+}
+
+path, distance = travelling_salesman_problem(graph)
+print(f"Shortest path: {' -> '.join(path)} with total distance: {distance}")
